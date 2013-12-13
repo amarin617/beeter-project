@@ -137,6 +137,7 @@ public class StingResource {
 	@Consumes(MediaType.BEETER_API_STING)
 	@Produces(MediaType.BEETER_API_STING)
 	public Sting createSting(Sting sting) {
+		String username = security.getUserPrincipal().getName();
 		if (sting.getContent().length() > 100) {
 			throw new BadRequestException(
 					"Subject length must be less or equal than 100 characters");
@@ -150,7 +151,7 @@ public class StingResource {
 		try {
 			Statement stmt = conn.createStatement();
 			String update = "insert into stings (username, content, subject) values ('"
-					+ sting.getUsername()
+					+ username
 					+ "', '"
 					+ sting.getContent()
 					+ "', '" + sting.getSubject() + "')";
@@ -167,6 +168,7 @@ public class StingResource {
 				if (rs.next()) {
 					sting.setLastModified(rs.getTimestamp(1));
 				}
+				sting.setUsername(username);
 				rs.close();
 				stmt.close();
 				conn.close();
@@ -177,6 +179,7 @@ public class StingResource {
 		} catch (SQLException e) {
 			throw new InternalServerException(e.getMessage());
 		}
+		
 		return sting;
 	}
 
